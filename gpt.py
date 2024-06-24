@@ -160,6 +160,7 @@ def extract_info(file_input, starting_condition_number, ending_condition_number)
                     "properties": {
                         "condition_name": {"type": "string", "description": "The name of the condition. REQUIRED."},
                         "condition_number": {"type": "integer", "description": "The number associated with the condition."},
+                        "tags": {"type": "array", "items": {"type": "string"}, "description": "A list of tags that describe what the condition is about. E.g. 'environmental', 'safety', 'pollution', 'wildlife', 'water quality', 'First Nations', etc."},
                         "condition_text": {"type": "string", "description": "The text of the condition. Fix spacing issues. Include the same newlines as in the document."},
                     },
                 },
@@ -257,6 +258,7 @@ def extract_subcondition(condition_text):
                           "type": "object",
                           "properties": {
                               "subcondition_identifier": {"type": "string", "description": "The number, letter, or other identifier of the subcondition. E.g. 1), 1 a), i, etc. Write it exactly as it appears in the text (i.e. include brackets). If none, leave blank."},
+                              "tags": {"type": "array", "items": {"type": "string"}, "description": "A list of tags that describe what the subcondition is about. E.g. 'environmental', 'safety', 'pollution', 'wildlife', 'water quality', 'First Nations', etc."},
                               "subcondition_text": {"type": "string", "description": "The text of the subcondition."},
                               "subconditions": {
                                   "type": "array",
@@ -264,6 +266,7 @@ def extract_subcondition(condition_text):
                                       "type": "object",
                                       "properties": {
                                           "subcondition_identifier": {"type": "string", "description": "The number, letter, or other identifier of the subcondition. E.g. 1), 1 a), i, etc. Write it exactly as it appears in the text (i.e. include brackets)."},
+                                          "tags": {"type": "array", "items": {"type": "string"}, "description": "A list of tags that describe what the subcondition is about. E.g. 'environmental', 'safety', 'pollution', 'wildlife', 'water quality', 'First Nations', etc."},
                                           "subcondition_text": {"type": "string", "description": "The text of the subcondition."},
                                           "subconditions": {
                                             "type": "array",
@@ -271,6 +274,7 @@ def extract_subcondition(condition_text):
                                                 "type": "object",
                                                 "properties": {
                                                     "subcondition_identifier": {"type": "string", "description": "The number, letter, or other identifier of the subcondition. E.g. 1), 1 a), i, etc. Write it exactly as it appears in the text (i.e. include brackets)."},
+                                                    "tags": {"type": "array", "items": {"type": "string"}, "description": "A list of tags that describe what the subcondition is about. E.g. 'environmental', 'safety', 'pollution', 'wildlife', 'water quality', 'First Nations', etc."},
                                                     "subcondition_text": {"type": "string", "description": "The text of the subcondition."},
                                                     
                                                 },
