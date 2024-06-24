@@ -100,7 +100,7 @@ def count_conditions(file_input):
   ]
   messages = [{"role": "user", "content": f"Here is a document with conditions:\n\n{file_text}"}]
   completion = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-4o-2024-05-13",
     messages=messages,
     tools=tools,
     tool_choice={"type": "function", "function": {"name": "count_conditions"}}
@@ -176,7 +176,7 @@ def extract_info(file_input, starting_condition_number, ending_condition_number)
 
   for attempt in range(5):  # Retry up to 5 times
       completion = client.chat.completions.create(
-          model="gpt-4o",
+          model="gpt-4o-2024-05-13",
           # model="gpt-3.5-turbo", 
           messages=messages,
           tools=tools,
@@ -296,7 +296,7 @@ def extract_subcondition(condition_text):
     ]
     messages = [{"role": "user", "content": f"Here is a condition:\n\n{condition_text}"}]
     completion = client.chat.completions.create(
-      model="gpt-4o",
+      model="gpt-4o-2024-05-13",
       messages=messages,
       tools=tools,
       tool_choice={"type": "function", "function": {"name": "format_condition"}}
@@ -332,7 +332,7 @@ def check_for_subconditions(input_condition_text):
   ]
   messages = [{"role": "user", "content": f"Here is the text of a condition:\n\n{input_condition_text}"}]
   completion = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-4o-2024-05-13",
     messages=messages,
     tools=tools,
     tool_choice={"type": "function", "function": {"name": "extract_subconditions"}}
