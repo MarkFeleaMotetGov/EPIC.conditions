@@ -130,45 +130,7 @@ class LengthFinishReasonError(FinishReasonError):
     pass
 
 def extract_info(file_input, starting_condition_number, ending_condition_number):
-  """
-  Extracts a range of conditions from a document (e.g. #11-15) using the GPT API and validate the response.
-
-  Parameters:
-  file_input (str): Filepath to the document.
-  starting_condition_number (int): The number of the starting condition to extract.
-  ending_condition_number (int): The number of the ending condition to extract.
-
-  Returns:
-  tuple: A tuple containing the full completion GPT API response and the extracted conditions as JSON, or an error message if the extraction fails.
-
-  Notes:
-  - The function attempts to extract the specified conditions up to 5 times, validating the response each time. On a failed validation, the function will retry.
-  - If the response is cut off due to GPT API response length limit, the function will recursively retry with a split range of conditions.
-
-  Raises:
-  LengthFinishReasonError: If the GPT response is cut off due to length.
-  FinishReasonError: If the GPT response has some other unexpected finish reason.
-  """
-
-  def validate_response(response, expected_count):
-      try:
-          finish_reason = response.choices[0].finish_reason
-          if finish_reason == "length":
-              raise LengthFinishReasonError("Response was cut off due to length of response.")
-          elif finish_reason != "stop":
-              raise FinishReasonError(f"Unexpected finish reason: {finish_reason}")
-
-          response_json = json.loads(response.choices[0].message.tool_calls[0].function.arguments)
-          
-          conditions = response_json.get("conditions", [])
-          return len(conditions) == expected_count
-
-      except Exception as e:
-          raise e
-
       
-  expected_count = ending_condition_number - starting_condition_number + 1
-
   file_text = None
   with open(file_input.name, "r") as f:
 
@@ -185,6 +147,8 @@ def extract_info(file_input, starting_condition_number, ending_condition_number)
   if starting_condition_number == ending_condition_number:
     print(f"Extracting condition {starting_condition_number} from the document.")
     conditions_list_description = f"Only condition {starting_condition_number} extracted from the document. ALWAYS includes the condition name."
+
+
 
   tools = [
     {
@@ -215,41 +179,24 @@ def extract_info(file_input, starting_condition_number, ending_condition_number)
   ]
   messages = [{"role": "user", "content": f"Here is a document with conditions:\n\n{file_text}\n\nExtract conditions {starting_condition_number} to {ending_condition_number}."}]
 
+  json_object = {
+      "custom_id": "request-1",
+      "method": "POST",
+      "url": "/v1/chat/completions",
+      "body": {
+          "model": "gpt-4o-2024-05-13",
+          "messages": messages,
+          "tools": tools,
+          "tool_choice": {"type": "function", "function": {"name": "format_info"}}
+      }
+  }
 
-  # Retry up to 3 times if validation fails
-  for attempt in range(3):  
-      try: 
-        completion = client.chat.completions.create(
-            model="gpt-4o-2024-05-13",
-            messages=messages,
-            tools=tools,
-            tool_choice={"type": "function", "function": {"name": "format_info"}}
-        )
+  print("ADDING TO JSONL FILE")
+  with open("test2.jsonl", "a") as jsonl_file:
+      jsonl_file.write(json.dumps(json_object) + "\n")
+  
+  # return completion, completion.choices[0].message.tool_calls[0].function.arguments
 
-        if validate_response(completion, expected_count):
-            print(Fore.GREEN + f"Successfully extracted conditions {starting_condition_number} to {ending_condition_number}!" + Fore.RESET)
-            return completion, completion.choices[0].message.tool_calls[0].function.arguments
-
-        print(Fore.RED + completion.choices[0].message.tool_calls[0].function.arguments + Fore.RESET)
-        print(Fore.RED + f"\nAttempt {attempt + 1}: Validation failed. Retrying...\n" + Fore.RESET)
-      except LengthFinishReasonError as e:
-          print(Fore.RED + f"WHOOPS! Exceeded GPT API response length (LengthFinishReasonError): {e}" + Fore.RESET)
-
-          # Recursively call the function to retry, splitting the range in half
-          mid = (starting_condition_number + ending_condition_number) // 2
-
-          print(Fore.YELLOW + f"Splitting... {starting_condition_number} to {mid}" + Fore.RESET)
-          _, first_half = extract_info(file_input, starting_condition_number, mid)
-          
-          print(Fore.YELLOW + f"Splitting... {mid + 1} to {ending_condition_number}" + Fore.RESET)
-          _, second_half = extract_info(file_input, mid + 1, ending_condition_number)
-
-          # Merge the two JSONs
-          merged = merge_json_chunks([first_half, second_half])
-          return None, merged
-
-      except Exception as e:
-          print(Fore.RED + f"Exception :( : {e}" + Fore.RESET)
 
   return None, "Failed to extract the correct number of conditions after multiple attempts"
 
