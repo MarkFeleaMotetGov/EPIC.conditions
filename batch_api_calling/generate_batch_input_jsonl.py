@@ -3,8 +3,10 @@ from openai import OpenAI
 client = OpenAI()
 import json
 import os
+import sys
 
-from gpt import extract_info
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from gpt import extract_info_chunked, count_conditions
 
 def generate_batch_input_jsonl(condition_documents_folder_path):
 
@@ -13,6 +15,10 @@ def generate_batch_input_jsonl(condition_documents_folder_path):
 
     for file in files:
         print(file)
+        # file_path = os.path.join(condition_documents_folder_path, file)
+        # with open(file_path, 'r') as f:
+            # file_conditions_count = count_conditions(f)
+            # print(file_conditions_count, file)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a JSONL file for batch API requests")
